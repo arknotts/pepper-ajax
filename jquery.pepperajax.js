@@ -1,4 +1,4 @@
-﻿(function ($) {
+(function ($) {
     //helper function
     $.fn.thisAndChildren = function (selector) {
         return this.filter(selector).add(this.find(selector));
@@ -15,7 +15,7 @@
 
         function initContent(content) {
             content = content || $('body'); //default to everything
-            
+
             content.thisAndChildren('[data-behavior=ajax]').each(function () {
                 var $this = $(this);
                 var resultDestination = $this.data('result-destination') || $this; //default to itself
@@ -52,7 +52,7 @@
                                 $(this).find('input').not('[type=hidden]').first().focus();
                             });
                         }
-                        
+
                         var eventTarget = html; //target to trigger ajaxLoaded event on
                         html.hide();
 
@@ -62,7 +62,7 @@
                         } else {
                             resultDestinationElement = $(resultDestination);
                         }
-                        
+
                         if (resultBehavior == 'append') {
                             resultDestinationElement.append(html);
                             showHtml();
@@ -135,7 +135,9 @@
                                 var inputs = $thisListItem.find('input, select, textarea');
                                 inputs.each(function () {
                                     var $thisInput = $(this);
-                                    $thisInput.attr('name', '[' + listItemIdx + '].' + $thisInput.attr('name'));
+                                    if ($thisInput.attr('name').indexOf('[') != 0) { //don't append multiple times
+                                        $thisInput.attr('name', '[' + listItemIdx + '].' + $thisInput.attr('name'));
+                                    }
                                 });
                             });
 
