@@ -40,3 +40,5 @@ By decorating the form with data-behavior="ajax", it tells pepperAjax to treat t
   - default: The ```method``` attribute of a form, or GET if not specified
  - **data-url=**
   - ```[URL]```: Tells pepperAjax what URL to make the AJAX call to. Required unless an action is already specified on the form
+ - **data-boundary**
+  - Defines a boundary for pepperAjax when it is gathering data to send for the AJAX call. Boundaries prevent pepperAjax from gathering too much data.
