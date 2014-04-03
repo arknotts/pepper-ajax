@@ -22,3 +22,21 @@ By decorating the form with data-behavior="ajax", it tells pepperAjax to treat t
   <div class="listItem">One Item</div>
 </div>
 ```
+
+### Available Data Attributes
+ - **data-behavior=**
+  - ```ajax```: Enables AJAX communication for a DOM element
+ - **data-result-destination=**
+  - ```[jQuery selector]```: A jQuery selector that tells pepperAjax where to put the result of the AJAX call
+  - default: The same DOM element that triggers the AJAX
+ - **data-result-behavior=**: Instructs pepperAjax how to add the result to the DOM
+  - ```replace``` (default): Replaces the result destination with the AJAX result
+  - ```append```: Appends the AJAX result to the result destination
+ - **data-forms=**
+  - ```[jQuery selector]```: A jQuery selector that specifies other forms/inputs to include in the AJAX call
+ - **data-method=**
+  - ```get```: Tells pepperAjax to use an HTTP GET when making the AJAX call
+  - ```post```: Tells pepperAjax to use an HTTP POST when making the AJAX call
+  - default: The ```method``` attribute of a form, or GET if not specified
+ - **data-url=**
+  - ```[URL]```: Tells pepperAjax what URL to make the AJAX call to. Required unless an action is already specified on the form
