@@ -20,8 +20,16 @@
                 var inputs = $thisListItem.find('input, select, textarea');
                 inputs.each(function () {
                     var $thisInput = $(this);
-                    if ($thisInput.attr('name').indexOf('[') != 0) { //don't append multiple times
-                        $thisInput.attr('name', '[' + listItemIdx + '].' + $thisInput.attr('name'));
+                    var thisInputName = $thisInput.attr('name');
+                    if (thisInputName != null) {
+                        var openBracketIdx = thisInputName.indexOf('[');
+                        if (openBracketIdx >= 0) {
+                            var closeBracketIdx = thisInputName.indexOf(']', openBracketIdx);
+                            var newInputName = thisInputName.substring(0, openBracketIdx + 1) +
+                                               listItemIdx +
+                                               thisInputName.substring(closeBracketIdx);
+                            $thisInput.attr('name', newInputName);
+                        }
                     }
                 });
             });
@@ -62,23 +70,48 @@
     function doAjax(ajaxTrigger) {
 
         //pull the data attributes of the element (generally data values take precedence over regular action and method attributes)
-        var resultDestination = ajaxTrigger.data('result-destination') || ajaxTrigger; //default to itself
-        var resultBehavior = ajaxTrigger.data('result-behavior') || 'replace';
-        var additionalForms = ajaxTrigger.data('forms');
-        var ajaxMethod = ajaxTrigger.data('method') || ajaxTrigger.attr('method') || 'get';
-        var url = ajaxTrigger.data('url') || ajaxTrigger.attr('action');
-        var refreshOnAjax = ajaxTrigger.data('refresh-onajax');
-
+        var resultDestination = ajaxTrigger.data('result-destination') || ajaxTrigger.closest('select').data('result-destination') || ajaxTrigger; //default to itself
+        var resultBehavior = ajaxTrigger.data('result-behavior') || ajaxTrigger.closest('select').data('result-destination') || 'replace';
+        var additionalInputs = ajaxTrigger.data('additional-inputs') || ajaxTrigger.closest('select').data('additional-inputs');
+        var ajaxMethod = ajaxTrigger.data('method') || ajaxTrigger.attr('method') || ajaxTrigger.closest('select').data('method') || 'get';
+        var url = ajaxTrigger.data('url') || ajaxTrigger.attr('action') || ajaxTrigger.closest('select').data('url');
+        var refreshOnAjax = ajaxTrigger.data('refresh-onajax') || ajaxTrigger.closest('select').data('refresh-onajax');
+        
         var beforeAjaxEvent = $.Event("ajax");
         ajaxTrigger.trigger(beforeAjaxEvent);
 
         //gather the data to send
         //find where we need to serialize from...use a boundary if it's found in the parent chain, otherwise itself
-        var boundary = ajaxTrigger.data('boundary') != null ? ajaxTrigger : ajaxTrigger.parents('[data-boundary]');
+        var boundary = ajaxTrigger.data('boundary') != null ? ajaxTrigger : ajaxTrigger.closest('[data-boundary]');
         var toSerializeRoot = boundary.length > 0 ? boundary : ajaxTrigger;
-        var requestData = ajaxTrigger.add(toSerializeRoot.find('form,input,select,textarea')).add(additionalForms).serialize();
-        
-        if (!beforeAjaxEvent.isDefaultPrevented()) {
+
+        //capture selects and set their value after the clone (jquery bug)
+        toSerializeRoot.find('input,textarea').each(function () {
+            $(this).attr('value', $(this).val());
+        });
+        var selects = toSerializeRoot.find('select');
+        var toSerializeClone = toSerializeRoot.clone();
+        selects.each(function (i) {
+            toSerializeClone.find("select").eq(i).val($(this).val());
+        });
+        toSerializeRoot = toSerializeClone;
+
+        var requestData = toSerializeRoot.find('input,select,textarea');
+
+        //set prefixes of form elements if parent prefix exists on boundary
+        requestData.each(function () {
+            var $thisInput = $(this);
+            var prefix = boundary.data('prefix');
+            if (prefix != null) {
+                $thisInput.attr('name', $thisInput.attr('name').replace(prefix + '.', ''));
+            }
+        });
+        if (ajaxMethod.toLowerCase() == 'get') {
+            requestData = requestData.filter('[data-for-get-request]'); //only filter automatic input inclusion
+        }
+        requestData = requestData.add(additionalInputs);
+
+        if (!beforeAjaxEvent.isDefaultPrevented() && url != null) {  //make sure it hasn't been prevented and we have a url to go to
             if (settings.disableButtonsOnAjax) {
                 disableContent(ajaxTrigger, true);
             }
@@ -87,7 +120,7 @@
             $.ajax({
                 url: url,
                 type: ajaxMethod,
-                data: requestData,
+                data: requestData.serialize(),
                 dataType: 'html',
                 statusCode: {
                     500: function () { settings.onAjaxError(); }
@@ -97,7 +130,7 @@
                 ajaxTrigger.trigger('ajaxDone', [data]);
 
                 var html = settings.json ? data[settings.jsonHtmlKey] : data;
-                html = $(html);
+                html = $($.trim(html));
                 html.css('opacity', '0');
 
                 function showHtml() {
@@ -109,7 +142,10 @@
                 var resultDestinationElement = resultDestination == 'parent-boundary' ? ajaxTrigger.parents('[data-boundary]') : $(resultDestination);
                 var resultDestinationParent = resultDestinationElement.parent();
 
-                if (resultBehavior == 'append') {
+                if (resultBehavior == 'append' || resultBehavior == 'empty-append') {
+                    if (resultBehavior == 'empty-append') {
+                        resultDestinationElement.empty();
+                    }
                     resultDestinationElement.append(html);
                     showHtml();
                 }
@@ -135,6 +171,27 @@
                     $('body').height('auto'); //reset the height that was fiddled with at the top
                 }
 
+                //prepend the prefix (if any) to the new elements
+                var prefix = html.parent().closest('[data-prefix]').data('prefix');
+                if (prefix != null) {
+                    html.each(function () {
+                        var $thisHtml = $(this);
+                        $thisHtml.thisAndChildren('input, select, textarea, [data-prefix]').each(function () {
+                            var $thisElement = $(this);
+                            var thisName = $thisElement.data('prefix') || $thisElement.attr('name');
+                            var separator = thisName.indexOf('[') == 0 ? '' : '.'; //don't use dot if it immediately is followed by an index
+
+                            var newName = prefix + separator + thisName;
+                            if ($thisElement.data('prefix') != null) {
+                                $thisElement.attr('data-prefix', newName).data('prefix', newName);
+                            }
+                            if ($thisElement.attr('name') != null) {
+                                $thisElement.attr('name', newName);
+                            }
+                        });
+                    });
+                }
+
                 html.find('input').not('[type=hidden]').first().focus();
                 html.trigger('ajaxLoaded');
 
@@ -156,7 +213,7 @@
 
     var methods = {
         init: function (content, options) {
-            
+
             settings = $.extend({
                 onAjaxError: function () { alert('We were unable to process your request at this time.'); },
                 json: false,
@@ -170,15 +227,24 @@
             content.thisAndChildren('[data-behavior=ajax]').each(function () {
                 var $this = $(this);
 
-                if ($this.prop("tagName") == "FORM") {
+                var tagName = $this.prop("tagName");
+                if (tagName == "FORM") {
                     $this.on('submit', function (e) {
                         e.preventDefault();
 
                         if (settings.prependInputIndexers) {
                             prependInputIndexers($this);
                         }
-                        
+
                         doAjax($this);
+                    });
+                }
+                else if (tagName == "SELECT") {
+                    $this.on('change', function (e) {
+                        e.preventDefault();
+                        var selectedOption = $this.find('option:selected');
+
+                        doAjax(selectedOption);
                     });
                 }
                 else {
@@ -231,5 +297,7 @@
             //initialize all of the ajax on new content
             methods['init']($(e.target), methodOrOptions);
         });
+
+        return this;
     }
 }(jQuery));
