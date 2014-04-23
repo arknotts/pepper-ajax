@@ -93,6 +93,9 @@ TODO
 
 ## Events
 
-TODO
+ - ```ajax```: Triggered before Pepper AJAX makes the AJAX request. Use e.preventDefault() to prevent the request from being submitted. This is often used for validation.
+ - ```ajaxDone```: Triggered when an AJAX request successfully finishes, but before the response is added to the DOM.
+ - ```ajaxLoaded```: Triggered after the response is added to the DOM. Listen for this event to initialize newly-loaded HTML.
+ - ```domChanged```: Triggered any time Pepper AJAX makes modifications to the DOM.
 
 
