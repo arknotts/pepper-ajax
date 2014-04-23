@@ -4,7 +4,7 @@ pepper-ajax
 Ajaxify your page by peppering it with HTML5 data attributes
 -----------
 
-### A simple example - AJAX Form
+## A simple example - AJAX Form
 
 ```HTML
 <div id="myList">
@@ -23,7 +23,7 @@ By decorating the form with data-behavior="ajax", it tells pepperAjax to treat t
 </div>
 ```
 
-### AJAX Button
+## AJAX Button
 
 ```HTML
 <button type="button" data-behavior="ajax" data-url="/UrlToContent">Load Content</button>
@@ -31,7 +31,7 @@ By decorating the form with data-behavior="ajax", it tells pepperAjax to treat t
 
 When clicked, this button replaces itself with content from /UrlToContent. NOTE: ```data-url``` is required for buttons.
 
-### AJAX Select List
+## AJAX Select List
 
 ```HTML
 <select data-behavior="ajax" data-result-destination="#content">
@@ -44,11 +44,30 @@ When clicked, this button replaces itself with content from /UrlToContent. NOTE:
 
 Pepper ajax will make the ajax call when a change event fires for the select list. Data attributes listed on the ```<select>``` node apply to all options unless it is overridden on the ```<option>``` itself.
 
-### Using Prefixes
+## How Pepper AJAX Gathers Request Data
+Pepper AJAX will try to automatically gather the data to send in its AJAX request. Often this is sufficient, but you can help it find the data by using boundaries to define "areas" of data. A boundary is a DOM element which encapsulates a related set of form elements.
 
-### Refreshing Dependent Page Content
+#### For AJAX Forms
+AJAX forms are submitted with all inputs, selects, and textareas contained within them.
 
-### Available Data Attributes
+#### For Other AJAX Elements (buttons, selects, etc.)
+Other AJAX elements look for a boundary to help gather data to submit. Mark a parent element with the ```data-boundary``` attribute and Pepper AJAX will gather all inputs, selects, and textareas within this boundary to submit.
+
+#### GET Requests
+If your AJAX request is sent via HTTP GET, Pepper AJAX will not include form elements unless they are marked with the ```data-for-get-request``` attribute. Additionally, Pepper AJAX will not look into child boundaries. Manually specify any additional elements you wish to include using the ```data-additional-inputs``` attribute.
+
+#### Manually including additional data
+Use the ```data-additional-inputs``` attribute to include additional form fields not automatically gathered by Pepper AJAX.
+
+## Using Prefixes
+
+TODO
+
+## Refreshing Dependent Page Content
+
+TODO
+
+## Available Data Attributes
  - **data-behavior=**
   - ```ajax```: Enables AJAX communication for a DOM element
  - **data-result-destination=**
@@ -68,8 +87,12 @@ Pepper ajax will make the ajax call when a change event fires for the select lis
  - **data-boundary**
   - Defines a boundary for pepperAjax when it is gathering data to send for the AJAX call. Boundaries prevent pepperAjax from gathering too much data.
 
-### Options
+## Options
 
-### Events
+TODO
+
+## Events
+
+TODO
 
 
