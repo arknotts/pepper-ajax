@@ -4,7 +4,7 @@ pepper-ajax
 Ajaxify your page by peppering it with HTML5 data attributes
 -----------
 
-### A simple example
+### A simple example - AJAX Form
 
 ```HTML
 <div id="myList">
@@ -22,6 +22,31 @@ By decorating the form with data-behavior="ajax", it tells pepperAjax to treat t
   <div class="listItem">One Item</div>
 </div>
 ```
+
+### AJAX Button
+
+```HTML
+<button type="button" data-behavior="ajax" data-url="/UrlToContent">Load Content</button>
+```
+
+When clicked, this button replaces itself with content from /UrlToContent. NOTE: ```data-url``` is required for buttons.
+
+### AJAX Select List
+
+```HTML
+<select data-behavior="ajax" data-result-destination="#content">
+  <option value="blue" data-url="/cars?color=blue">Blue Cars</option>
+  <option value="red" data-url="/cars?color=red">Red Cars</option>
+</select>
+
+<div id="content"></div>
+```
+
+Pepper ajax will make the ajax call when a change event fires for the select list. Data attributes listed on the ```<select>``` node apply to all options unless it is overridden on the ```<option>``` itself.
+
+### Using Prefixes
+
+### Refreshing Dependent Page Content
 
 ### Available Data Attributes
  - **data-behavior=**
@@ -42,3 +67,9 @@ By decorating the form with data-behavior="ajax", it tells pepperAjax to treat t
   - ```[URL]```: Tells pepperAjax what URL to make the AJAX call to. Required unless an action is already specified on the form
  - **data-boundary**
   - Defines a boundary for pepperAjax when it is gathering data to send for the AJAX call. Boundaries prevent pepperAjax from gathering too much data.
+
+### Options
+
+### Events
+
+
