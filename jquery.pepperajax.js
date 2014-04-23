@@ -6,38 +6,6 @@
 
     var settings;
 
-    function prependInputIndexers(content) {
-        //add the list-item indexers on form submit
-        var allListItems = content.find('[data-behavior=list-item]');
-
-        while (allListItems.length > 0) {
-            var first = allListItems.first();
-            var oneSetOfListItems = first.add(first.siblings('[data-behavior=list-item]'));
-
-            oneSetOfListItems.each(function (listItemIdx) {
-                var $thisListItem = $(this);
-
-                var inputs = $thisListItem.find('input, select, textarea');
-                inputs.each(function () {
-                    var $thisInput = $(this);
-                    var thisInputName = $thisInput.attr('name');
-                    if (thisInputName != null) {
-                        var openBracketIdx = thisInputName.indexOf('[');
-                        if (openBracketIdx >= 0) {
-                            var closeBracketIdx = thisInputName.indexOf(']', openBracketIdx);
-                            var newInputName = thisInputName.substring(0, openBracketIdx + 1) +
-                                               listItemIdx +
-                                               thisInputName.substring(closeBracketIdx);
-                            $thisInput.attr('name', newInputName);
-                        }
-                    }
-                });
-            });
-
-            //remove ones that are already done
-            allListItems = allListItems.not(oneSetOfListItems);
-        }
-    }
 
     function disableContent(content, disable) {
         if (disable) {
@@ -82,19 +50,21 @@
 
         //gather the data to send
         //find where we need to serialize from...use a boundary if it's found in the parent chain, otherwise itself
-        var boundary = ajaxTrigger.data('boundary') != null ? ajaxTrigger : ajaxTrigger.closest('[data-boundary]');
-        var toSerializeRoot = boundary.length > 0 ? boundary : ajaxTrigger;
+        var boundary;
+        if (ajaxTrigger.prop('tagName') == 'FORM') {
+            boundary = ajaxTrigger; //always use the form if it's being submitted
+        }
+        else {
+            //use itself if it's a boundary otherwise use the closest boundary
+            boundary = ajaxTrigger.data('boundary') != null ? ajaxTrigger : ajaxTrigger.closest('[data-boundary]');
+        }
 
-        //capture selects and set their value after the clone (jquery bug)
-        toSerializeRoot.find('input,textarea').each(function () {
-            $(this).attr('value', $(this).val());
-        });
-        var selects = toSerializeRoot.find('select');
-        var toSerializeClone = toSerializeRoot.clone();
-        selects.each(function (i) {
-            toSerializeClone.find("select").eq(i).val($(this).val());
-        });
-        toSerializeRoot = toSerializeClone;
+        var toSerializeRoot = boundary.length > 0 ? boundary : ajaxTrigger;
+        toSerializeRoot = toSerializeRoot.clone();
+
+        if (ajaxMethod.toLowerCase() == 'get') {
+            toSerializeRoot.find('[data-boundary]').remove();
+        }
 
         var requestData = toSerializeRoot.find('input,select,textarea');
 
@@ -106,9 +76,11 @@
                 $thisInput.attr('name', $thisInput.attr('name').replace(prefix + '.', ''));
             }
         });
+
         if (ajaxMethod.toLowerCase() == 'get') {
             requestData = requestData.filter('[data-for-get-request]'); //only filter automatic input inclusion
         }
+
         requestData = requestData.add(additionalInputs);
 
         if (!beforeAjaxEvent.isDefaultPrevented() && url != null) {  //make sure it hasn't been prevented and we have a url to go to
@@ -218,7 +190,6 @@
                 onAjaxError: function () { alert('We were unable to process your request at this time.'); },
                 json: false,
                 jsonHtmlKey: 'html',
-                prependInputIndexers: false,
                 disableButtonsOnAjax: true
             }, options);
 
@@ -231,10 +202,6 @@
                 if (tagName == "FORM") {
                     $this.on('submit', function (e) {
                         e.preventDefault();
-
-                        if (settings.prependInputIndexers) {
-                            prependInputIndexers($this);
-                        }
 
                         doAjax($this);
                     });
