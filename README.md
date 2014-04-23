@@ -53,7 +53,7 @@ AJAX forms are submitted with all inputs, selects, and textareas contained withi
 #### For Other AJAX Elements (buttons, selects, etc.)
 Other AJAX elements look for a boundary to help gather data to submit. Mark a parent element with the ```data-boundary``` attribute and Pepper AJAX will gather all inputs, selects, and textareas within this boundary to submit.
 
-#### GET Requests
+#### A Note on GET Requests
 If your AJAX request is sent via HTTP GET, Pepper AJAX will not include form elements unless they are marked with the ```data-for-get-request``` attribute. Additionally, Pepper AJAX will not look into child boundaries. Manually specify any additional elements you wish to include using the ```data-additional-inputs``` attribute.
 
 #### Manually including additional data
@@ -63,9 +63,17 @@ Use the ```data-additional-inputs``` attribute to include additional form fields
 
 TODO
 
-## Refreshing Dependent Page Content
+## Refreshing Other Page Content
 
-TODO
+If your AJAX request modifies data server side that needs reflected in the browser, you can tell Pepper AJAX what DOM elements to refresh in response to an AJAX call. First, make sure the content you wish to refresh has the ```data-url``` attribute defined. The specified URL should return the refreshed content.
+
+#### Proactive Content Refreshing
+
+If you know what content needs refreshed in response to an AJAX call ahead of time, list that content in the ```data-refresh-onajax``` attribute of your AJAX element.
+
+#### Reactive Content Refreshing
+
+If you only know what content needs refreshed after an AJAX call is finished, use the ```data-refresh-onload``` attribute on the **root** element of the response.
 
 ## Available Data Attributes
  - **data-behavior=**
