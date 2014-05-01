@@ -84,7 +84,7 @@ If you only know what content needs refreshed after an AJAX call is finished, us
  - **data-result-behavior=**: Instructs pepperAjax how to add the result to the DOM
   - ```replace``` (default): Replaces the result destination with the AJAX result
   - ```append```: Appends the AJAX result to the result destination
- - **data-forms=**
+ - **data-additional-inputs=**
   - ```[jQuery selector]```: A jQuery selector that specifies other forms/inputs to include in the AJAX call
  - **data-method=**
   - ```get```: Tells pepperAjax to use an HTTP GET when making the AJAX call
