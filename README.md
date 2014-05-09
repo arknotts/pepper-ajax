@@ -104,6 +104,6 @@ TODO
  - ```ajax```: Triggered before Pepper AJAX makes the AJAX request. Use ```e.target``` to get the ajax element. Use e.preventDefault() to prevent the request from being submitted. This is often used for validation.
  - ```ajaxDone```: Triggered when an AJAX request successfully finishes, but before the response is added to the DOM. One additional parameter ```data``` is passed to the callback function which is the raw data returned from the AJAX call.
  - ```ajaxLoaded```: Triggered after the response is added to the DOM. Listen for this event to initialize newly-loaded HTML. Use ```e.target``` to get the newly-added HTML from the AJAX call.
- - ```domChanged```: Triggered any time Pepper AJAX makes modifications to the DOM. Use ```e.target``` to get the newly-added HTML from the AJAX call.
+ - ```domChanged```: Triggered any time Pepper AJAX makes modifications to the DOM. Use ```e.target``` to get the content that changed.
 
 
